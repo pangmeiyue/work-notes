@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // 1 将一个数组分割成每三个一组
+        var data = ['法国','澳大利亚','智利','新西兰','西班牙','加拿大','阿根廷','美国','0','国产','波多黎各','英国','比利时','德国','意大利','意大利',];
+        var result = [];
+        for(var i=0,len=data.length;i<len;i+=3){
+        result.push(data.slice(i,i+3));
+        }
+
+        //2 触发网页关闭事件 但是不触发刷新事件
+        //（需求：为了安全在用户关闭网页之后，直接输入原来的地址，需要回到登录页重新登录）
+        //(解决办法：将登录信息存放在cookie和sessionStorage里  然后在路由里做双重判断 )
+        //a 登录组件
+        /**cookieUtil.set('isAdmin','true',{expires:1})
+        cookieUtil.set('isLogin','true',{expires:1})
+        window.sessionStorage.setItem('isLogin',true)
+        window.sessionStorage.setItem('isAdmin',true)
+        this.$router.push({
+        path: '/pvnvcsdatas'
+        })**/
+        //b main.js
+        /**let token = cookieUtil.get('isLogin')
+        let session = window.sessionStorage.getItem('isLogin')
+        //复制进去的地址不触发路由  在去往别的路由的时候 没有cookie或者没有sessionStorage都要到登录页
+        if(window.location.href.split('/').pop() !== 'login' && !token ||  !session){
+            router.push('/login')
+        }
+
+        router.beforeEach((to, from, next) => {
+        let sessionLogin = window.sessionStorage.getItem('isLogin')
+        //在有cookie和sessionStorage的情况下
+        if(cookieUtil.get('isLogin') && sessionLogin){
+            if(to.path === '/login'){
+                next('/pvnvcsdatas')
+            }else{
+                next()
+            }
+        }else{
+            if(to.path === '/login'){
+                next();
+                return;
+            }
+            next('/login');
+        }
+        })**/
+
+        // 3 递归 将不符合条件的数据删除
+        let a={"code":200,"status":true,"message":"操作成功.","body":[{"createAt":"","createDate":null,"modifyAt":"1:admin","modifyDate":1529896384000,"id":"1019","code":"systemManager","name":"系统管理","type":0,"url":"11111","method":"NONE","priority":0,"path":"/system","component":"","icon":"icon-manage","status":"0","roleSet":[],"parentId":"0","children":[{"createAt":"","createDate":null,"modifyAt":"admin","modifyDate":1530855694000,"id":"1020","code":"userManager","name":"用户管理","type":0,"url":"","method":"NONE","priority":0,"path":"userManager","component":"","icon":"icon-yonghuguanli","status":"0","roleSet":[],"parentId":"1019","children":null},{"createAt":"admin","createDate":1530855694000,"modifyAt":"admin","modifyDate":1530855694000,"id":"46bd4cb60f33fb366591d74429a636da","code":"auditLog","name":"审计日志","type":0,"url":null,"method":null,"priority":0,"path":"auditLog","component":null,"icon":"icon-xiaoximobanliebiao","status":"0","roleSet":[],"parentId":"1019","children":null},{"createAt":"","createDate":null,"modifyAt":"admin","modifyDate":1530855694000,"id":"1021","code":"roleManager","name":"平台管理","type":0,"url":"","method":"NONE","priority":1,"path":"projectManager","component":"","icon":"icon-xiangmuguanli","status":"0","roleSet":[],"parentId":"1019","children":[{"createAt":"admin","createDate":1530775149000,"modifyAt":"admin","modifyDate":1530855694000,"id":"3b71466087a2789de8919d95fa2cda02","code":"RESOUCE-CONFIG","name":"资源配置","type":1,"url":null,"method":null,"priority":0,"path":"","component":null,"icon":"","status":"0","roleSet":[],"parentId":"1021","children":null},{"createAt":"admin","createDate":1530775149000,"modifyAt":"admin","modifyDate":1530855694000,"id":"8053539c84992a3391dac88b57ddc0ec","code":"ROLE-CONFIG","name":"角色配置","type":1,"url":null,"method":null,"priority":0,"path":"","component":null,"icon":"","status":"0","roleSet":[],"parentId":"1021","children":null}]},{"createAt":"","createDate":null,"modifyAt":"admin","modifyDate":1530855694000,"id":"3","code":"GET_ALL_MENU","name":"获取所有菜单","type":2,"url":"/api/uc/resource/all/**","method":"GET","priority":2,"path":"","component":"","icon":"","status":"0","roleSet":[],"parentId":"1019","children":null},{"createAt":"","createDate":null,"modifyAt":"admin","modifyDate":1530855694000,"id":"1","code":"GET_USER_INFO","name":"获取用户信息","type":2,"url":"/api/uc/user/info/**","method":"GET","priority":2,"path":"","component":"","icon":"","status":"0","roleSet":[],"parentId":"1019","children":null},{"createAt":"","createDate":null,"modifyAt":"admin","modifyDate":1530855694000,"id":"2","code":"UPDATE_PWD","name":"修改当前用户密码","type":2,"url":"/api/uc/user/updatePwd/**","method":"PUT","priority":2,"path":"","component":"","icon":"","status":"0","roleSet":[],"parentId":"1019","children":null}]}],"timestamp":1530863569267}
+        let idArr = ["3", "1", "2", "1021", "1020", "1019"]
+        console.log(filterData(a.body));
+        
+        function filterData(filterArray) {
+            for(let i = 0; i < filterArray.length; i++){
+                if(idArr.indexOf(filterArray[i].id) >= 0){
+                    if(filterArray[i].children){
+                        filterData(filterArray[i].children);
+                    }
+                }else{
+                    filterArray.splice(i,1);
+                    i--;
+                }
+            }
+            return filterArray
+        }
+        
+        // 递归 将嵌套数组拆分成一个数组
+        let arr = [1,2,3,[4,5,6,7,[8,9,10,11,[12,13,14,15,16],17,18],19,20],21,22];
+        let empty = reduce(arr);
+
+        function reduce(arr){
+            let newArr = []
+            arr.forEach(item => {
+                if(Array.isArray(item)){
+                    newArr = reduce(item).concat(newArr)
+                }else{
+                    newArr.unshift(item)
+                }
+            });
+            return newArr
+        }
+        //将数组的每一项求和
+        function getSum(arr){
+            let sum = 0;
+            arr.forEach(item=>{
+                if(Array.isArray(item)){
+                    sum += reduce(item);
+                }else{
+                    sum += item;
+                }
+            })
+            return sum;
+        }
+
+    </script>
+</body>
+</html>
